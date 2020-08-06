@@ -37,7 +37,7 @@ cam = webcam();
 videoFrame = snapshot(cam);
 frameSize = size(videoFrame);
 
-% Create the video player object.
+% Create the video player object and initialize variables.
 videoPlayer = vision.VideoPlayer('Position', [930 430 678 527]);
 runLoop = true;
 numPts_left = 0;
@@ -56,7 +56,7 @@ hHeightEye = 0.05;
 hHeightInt = 0.6;
 hWidthInt = 0.25;
 amp = 0.25;
-fs = 250;  % sampling frequency
+fs = 250; 
 duration = 0.5;
 freq = 280;
 val = 0:1/fs:duration;
@@ -68,6 +68,7 @@ recordingCounter = 1;
 calibrationCounter = 1;
 hPredictors = zeros(10,3);
 vPredictors = zeros(10,2);
+endOfPageCounter=0;
 calibrationPoints=[0 0.5; 0.25 0.5; 0.5 0.5; 0.75 0.5; 1 0.5; 0.5 0; 0.5 0.25; 0.5 0.5; 0.5 0.75; 0.5 1];
     
 %% loop
@@ -78,15 +79,18 @@ while runLoop && frameCount < 5000
     videoFrameGray = rgb2gray(videoFrame);
     frameCount = frameCount + 1;
     
+    %check if one of the points is lost or initialize them
     if numPts_left < numPts_threshold || numPts_right < numPts_threshold ...
             || numPts_mouth < 2 || numPts_leftAP < numPts_threshold ...
             || numPts_rightAP < numPts_threshold || numPts_nose < numPts_threshold
         %% Detection mode.
         
-        
+        % detect the face
         bboxFace = faceDetector.step(videoFrameGray);
         
         if ~isempty(bboxFace)
+            %from all the possible square recognized as face, find the
+            %bigger one that corresponds to the face 
             bboxFace = findBiggerRect(bboxFace);
             
             %Roi parameters
@@ -464,6 +468,7 @@ while runLoop && frameCount < 5000
             hold on
             
             plot(calibrationPoints(:,1), calibrationPoints(:,2),'k.','MarkerSize',30);
+            firstTime = false;
          end
 
          
@@ -510,9 +515,6 @@ while runLoop && frameCount < 5000
              % vertical model parameters
              V = regress(Yv,Xv);
          end
-        if firstTime
-            firstTime = false;
-        end
          
     else
          %%---------------------------- PREDICTION -----------------------------%%
@@ -612,7 +614,6 @@ release(rightEyeDetector);
 release(mouthDetector);
 release(noseDetector);
 close all
-calibrationTargets = calibrationTargets(1:end-1,:);
 clearvars -except horizontal vertical calibrationTargets videoMontage
 
 %% save video

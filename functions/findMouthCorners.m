@@ -29,6 +29,5 @@ function mouthCorners = findMouthCorners(mouthImage)
     y2 = mean(find(chrom(:,x2)>0));
     
     mouthCorners = [x1,y1;x2,y2];
-    figure(2),imshow(chrom)
 end
 
