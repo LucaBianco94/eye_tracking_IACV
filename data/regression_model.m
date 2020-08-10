@@ -4,44 +4,35 @@ clear
 clc
 
 %% preparation
-files = dir('C:/users/bianc/Google Drive/LM Milano 18_19/III Semestre/Image Analysis and Computer Vision/Project/previous years/eyeTracking-gazeEstimation-master/data/dataset*');
-load(files(1).name)
-if size(files,1)>1
-    for ii=2:size(files,1)
-        L = load(files(ii).name);
-        calibrationTargets = [calibrationTargets;L.calibrationTargets];
-        horizontal = [horizontal;L.horizontal];
-        vertical = [vertical;L.vertical];
+files_v = dir('data/dataset_v_*'); 
+files_h = dir('data/dataset_h_*'); 
+
+T_v =[];
+if size(files_v,1)>1
+    for ii=1:size(files_v,1)
+        L_v = readtable(files_v(ii).name);
+        T_v = [T_v; L_v];
     end
 end
+T_h =[];
+if size(files_h,1)>1
+    for ii=1:size(files_h,1)
+        L_h = readtable(files_h(ii).name);
+        T_h = [T_h; L_h];
+    end
+end
+%% 
 
-%% regression
-Xh = [ones(size(horizontal, 1), 1) horizontal(:,1) horizontal(:,2) horizontal(:,3)...
-    horizontal(:,4) horizontal(:,5) horizontal(:,6)];
-Xv = [ones(size(vertical, 1), 1) vertical(:,1) vertical(:,2) vertical(:,3)...
-    vertical(:,4) vertical(:,5) vertical(:,6)];
-Yh = calibrationTargets(:,1);
-Yv = calibrationTargets(:,2);
+Xh = [table2array(T_h(:,2)) table2array(T_h(:,3)) ...
+    table2array(T_h(:,4)) table2array(T_h(:,5)) table2array(T_h(:,6))];
+Xv = [table2array(T_v(:,2)) table2array(T_v(:,3)) ...
+      table2array(T_v(:,4)) table2array(T_v(:,5)) table2array(T_v(:,6)) ...
+      table2array(T_v(:,7)) table2array(T_v(:,8)) table2array(T_v(:,9))];
+Yh = table2array(T_h(:,1));
+Yv = table2array(T_v(:,1));
              
 % horizontal model parameters
 H = regress(Yh,Xh);
 % vertical model parameters
 V = regress(Yv,Xv);
 
-%% results
-predH = zeros(size(calibrationTargets,1),1);
-predV = zeros(size(calibrationTargets,1),1);
-for ii = 1:size(calibrationTargets,1)
-    predH(ii) = [1, horizontal(ii,:)]*H;
-    predV(ii) = [1, vertical(ii,:)]*V;
-end
-subplot(211)
-plot(Yh,'k'), hold on, plot(predH,'r')
-title('horizontal ax'), legend('real','predicted')
-subplot(212)
-plot(Yv,'k'), hold on, plot(predV,'r')
-title('vertical ax'), legend('real','predicted')
-
-%% closing and saving
-clearvars -except H V
-save('regressionModel.mat')
