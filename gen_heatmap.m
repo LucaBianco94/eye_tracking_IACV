@@ -8,6 +8,7 @@
 
 files = dir('data/test1.mat');
 load(files(1).name)
+%% 
 
 c = zeros(size(predsH));
 r = zeros(size(predsV));
@@ -81,11 +82,15 @@ data_map = [length(n41) length(n42) length(n43) length(n44); ...
             length(n31) length(n32) length(n33) length(n34); ...
             length(n21) length(n22) length(n23) length(n24); ...
             length(n11) length(n12) length(n13) length(n14); ...
-            ];
-heatmap(xval,yval,data_map,'ColorMap',winter)
-
-figure(2)
-plot(predsH,predsV,'*')
+            ]; 
+        
+heatFigure = figure(1);
+heatFigure.ToolBar = 'none';
+heatFigure.MenuBar = 'none';
+heatFigure.WindowState = 'maximized';
+heatFigure.Position = [0 0 1440 900];
+heatFigure.Resize = 'off';
+heatmap(heatFigure,xval,yval,data_map,'FontSize',1,'ColorMap',winter,'ColorbarVisible','off')
 
 
 
