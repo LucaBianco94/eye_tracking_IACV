@@ -9,6 +9,7 @@
 close all
 clear
 clc
+addpath('data')
 
 %% preparation
 files = dir('data/dataset*');
@@ -25,8 +26,8 @@ if size(files,1)>1
 end
 
 %% regression
-Xh_l = [ones(size(horizontal_l, 1), 1) horizontal_l(:,1) horizontal_l(:,2) horizontal_l(:,3)];
-Xh_r = [ones(size(horizontal_r, 1), 1) horizontal_r(:,1) horizontal_r(:,2) horizontal_r(:,3)];
+Xh_l = [ones(size(horizontal_l, 1), 1) horizontal_l(:,1) horizontal_l(:,2) horizontal_l(:,3) horizontal_l(:,4)];
+Xh_r = [ones(size(horizontal_r, 1), 1) horizontal_r(:,1) horizontal_r(:,2) horizontal_r(:,3) horizontal_r(:,4)];
 Xv_l = [ones(size(vertical_l, 1), 1) vertical_l(:,1) vertical_l(:,2) vertical_l(:,3)];
 Xv_r = [ones(size(vertical_r, 1), 1) vertical_r(:,1) vertical_r(:,2) vertical_r(:,3)];
 Yh = calibrationTargets(:,1);

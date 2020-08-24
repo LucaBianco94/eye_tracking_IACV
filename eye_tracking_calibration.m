@@ -81,12 +81,12 @@ bip1 = amp*sin(2*pi* freq*val);
 bip2 = amp*sin(2*pi* 2*freq*val);
 
 % preallocation
-h_l_feat = zeros(frame_number,3);
-h_r_feat = zeros(frame_number,3);
+h_l_feat = zeros(frame_number,4);
+h_r_feat = zeros(frame_number,4);
 v_l_feat = zeros(frame_number,3);
 v_r_feat = zeros(frame_number,3);
-horizontal_l = zeros(num_of_points,3);
-horizontal_r = zeros(num_of_points,3);
+horizontal_l = zeros(num_of_points,4);
+horizontal_r = zeros(num_of_points,4);
 vertical_l = zeros(num_of_points,3);
 vertical_r = zeros(num_of_points,3);
 calibrationTargets = zeros(num_of_points+1,2);
@@ -402,19 +402,22 @@ while runLoop && frameCount < frame_number
     % end of tracking
     
     %% FEATURE COLLECTION
-    % horizontal features
-    
+        
     %horiz
+    h_scale = -(bbox_eye_left(1)-bbox_eye_right(1));   %scale factors
+    diff = -(bbox_eye_left(1)-xyPoints_nose(1))-(bbox_eye_right(1)-xyPoints_nose(1));
     %left
     h_leftEyeNose = -(eyeCenter_left(1) - xyPoints_nose(1));
     h_leftEyeleftCorner = -(eyeCenter_left(1) - leftAnchorPoint(1));
     h_leftCornerNose = -(leftAnchorPoint(1) - xyPoints_nose(1));
+    h_leftExtEyeNose_diff = diff;
     %right
     h_rightEyeNose = (eyeCenter_right(1) - xyPoints_nose(1));
     h_rightEyerightCorner = (eyeCenter_right(1) - rightAnchorPoint(1));
     h_rightCornerNose = (rightAnchorPoint(1) - xyPoints_nose(1));
-    
+    h_rightExtEyeNose_diff = diff;
     %vert
+    v_scale = (bbox_eye_left(4)+bbox_eye_right(4))/2;   %scale factors
     %left
     v_leftEyeNose = (eyeCenter_left(2) - xyPoints_nose(2));
     v_leftCornerNose = (leftAnchorPoint(2) - xyPoints_nose(2));
@@ -437,21 +440,23 @@ while runLoop && frameCount < frame_number
 %     vy = Vg(1,2)/L_c;
     
     % horizontal distance between left eye center and left anchor point
-    h_l_feat(frameCount,1) = h_leftEyeNose;
-    h_l_feat(frameCount,2) = h_leftEyeleftCorner;
-    h_l_feat(frameCount,3) = h_leftCornerNose;
-    h_r_feat(frameCount,1) = h_rightEyeNose;
-    h_r_feat(frameCount,2) = h_rightEyerightCorner;
-    h_r_feat(frameCount,3) = h_rightCornerNose;
+    h_l_feat(frameCount,1) = h_leftEyeNose/h_scale;
+    h_l_feat(frameCount,2) = h_leftEyeleftCorner/h_scale;
+    h_l_feat(frameCount,3) = h_leftCornerNose/h_scale;
+    h_l_feat(frameCount,4) = h_leftExtEyeNose_diff/h_scale;
+    h_r_feat(frameCount,1) = h_rightEyeNose/h_scale;
+    h_r_feat(frameCount,2) = h_rightEyerightCorner/h_scale;
+    h_r_feat(frameCount,3) = h_rightCornerNose/h_scale;
+    h_r_feat(frameCount,4) = h_rightExtEyeNose_diff/h_scale;
     
     % vertical features
     % vertical distance between left eye center and left anchor point
-    v_l_feat(frameCount,1) = v_leftEyeNose;
-    v_l_feat(frameCount,2) = v_leftCornerNose;
-    v_l_feat(frameCount,3) = v_leftEyeleftEyelid;
-    v_r_feat(frameCount,1) = v_rightEyeNose;
-    v_r_feat(frameCount,2) = v_rightCornerNose;
-    v_r_feat(frameCount,3) = v_rightEyerightEyelid;
+    v_l_feat(frameCount,1) = v_leftEyeNose/v_scale;
+    v_l_feat(frameCount,2) = v_leftCornerNose/v_scale;
+    v_l_feat(frameCount,3) = v_leftEyeleftEyelid/v_scale;
+    v_r_feat(frameCount,1) = v_rightEyeNose/v_scale;
+    v_r_feat(frameCount,2) = v_rightCornerNose/v_scale;
+    v_r_feat(frameCount,3) = v_rightEyerightEyelid/v_scale;
     
     %% figure 
     if mod(frameCount,window1) == 1
@@ -475,13 +480,15 @@ while runLoop && frameCount < frame_number
     ax.Visible = 'off';
    
     % Display tracked points.
+    videoFrame = insertMarker(videoFrame, [bbox_eye_left(1),bbox_eye_left(2)+(bbox_eye_left(4)/2)], '*', 'Color', 'magenta');
+    videoFrame = insertMarker(videoFrame, [bbox_eye_right(1)+bbox_eye_right(3),bbox_eye_right(2)+(bbox_eye_right(4)/2)], '*', 'Color', 'magenta');
     videoFrame = insertMarker(videoFrame, eyeCenter_left, '*', 'Color', 'yellow');
     videoFrame = insertMarker(videoFrame, eyeCenter_right, '*', 'Color', 'yellow');
-    videoFrame = insertMarker(videoFrame, leftEyelid(1,:), '+', 'Color', 'white');
-    videoFrame = insertMarker(videoFrame, rightEyelid(1,:), '+', 'Color', 'white');
-    videoFrame = insertMarker(videoFrame, leftAnchorPoint, '+', 'Color', 'cyan');
-    videoFrame = insertMarker(videoFrame, rightAnchorPoint, '+', 'Color', 'cyan');
-    videoFrame = insertMarker(videoFrame, xyPoints_nose, '+', 'Color', 'white');
+    videoFrame = insertMarker(videoFrame, leftEyelid(1,:), '+', 'Color', 'blue');
+    videoFrame = insertMarker(videoFrame, rightEyelid(1,:), '+', 'Color', 'blue');
+    videoFrame = insertMarker(videoFrame, leftAnchorPoint, '+', 'Color', 'green');
+    videoFrame = insertMarker(videoFrame, rightAnchorPoint, '+', 'Color', 'green');
+    videoFrame = insertMarker(videoFrame, xyPoints_nose, '*', 'Color', 'black');
 
     % Display the annotated video frame using the video player object.
     step(videoPlayer, videoFrame);

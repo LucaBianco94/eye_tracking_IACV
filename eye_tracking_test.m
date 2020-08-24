@@ -33,6 +33,7 @@ cam = webcam();
 % Capture one frame to get its size.
 videoFrame = snapshot(cam);
 frameSize = size(videoFrame);
+%% 
 
 % calibration object
 testFigure = figure(1);
@@ -43,11 +44,11 @@ testFigure.Units = 'Normalized';
 testFigure.Position = [0 0 1 1];
 testFigure.Resize = 'off';
 
-figure_test = 3;
+figure_test = 4;
 
 if(figure_test==1)
-    rectangle('Position',[0,0,0.25,0.25],'FaceColor','g')
-    rectangle('Position',[0.25,0,0.25,0.25],'FaceColor','b')
+    rectangle('Position',[0,0,0.25,0.25],'FaceColor','b')
+    rectangle('Position',[0.25,0,0.25,0.25],'FaceColor','g')
     rectangle('Position',[0.50,0,0.25,0.25],'FaceColor','g')
     rectangle('Position',[0.75,0,0.25,0.25],'FaceColor','g')
     rectangle('Position',[0,0.25,0.25,0.25],'FaceColor','b')
@@ -68,11 +69,11 @@ elseif(figure_test==2)
     rectangle('Position',[0.50,0,0.25,0.25],'FaceColor','b')
     rectangle('Position',[0.75,0,0.25,0.25],'FaceColor','b')  
     rectangle('Position',[0,0.25,0.25,0.25],'FaceColor','b')
-    rectangle('Position',[0.25,0.25,0.25,0.25],'FaceColor','b')
+    rectangle('Position',[0.25,0.25,0.25,0.25],'FaceColor','g')
     rectangle('Position',[0.50,0.25,0.25,0.25],'FaceColor','g')
     rectangle('Position',[0.75,0.25,0.25,0.25],'FaceColor','g')
     rectangle('Position',[0,0.50,0.25,0.25],'FaceColor','b')
-    rectangle('Position',[0.25,0.50,0.25,0.25],'FaceColor','g')
+    rectangle('Position',[0.25,0.50,0.25,0.25],'FaceColor','b')
     rectangle('Position',[0.50,0.50,0.25,0.25],'FaceColor','g')
     rectangle('Position',[0.75,0.50,0.25,0.25],'FaceColor','g')
     rectangle('Position',[0,0.75,0.25,0.25],'FaceColor','b')
@@ -197,6 +198,7 @@ else
     end
     
 end
+%% 
     
 % Create the video player object.
 videoPlayer = vision.VideoPlayer('Position', [50 50 [frameSize(2), frameSize(1)]]);
@@ -540,16 +542,21 @@ while runLoop && ~endOfPage
      %% features extraction
     
     %horiz
+    h_scale = -(bbox_eye_left(1)-bbox_eye_right(1));   %scale factors
+    diff = -(bbox_eye_left(1)-xyPoints_nose(1))-(bbox_eye_right(1)-xyPoints_nose(1));
     %left
     h_leftEyeNose = -(eyeCenter_left(1) - xyPoints_nose(1));
     h_leftEyeleftCorner = -(eyeCenter_left(1) - leftAnchorPoint(1));
     h_leftCornerNose = -(leftAnchorPoint(1) - xyPoints_nose(1));
+    h_leftExtEyeNose_diff = diff
     %right
     h_rightEyeNose = (eyeCenter_right(1) - xyPoints_nose(1));
     h_rightEyerightCorner = (eyeCenter_right(1) - rightAnchorPoint(1));
     h_rightCornerNose = (rightAnchorPoint(1) - xyPoints_nose(1));
+    h_rightExtEyeNose_diff = diff;
     
     %vert
+    v_scale = (bbox_eye_left(4)+bbox_eye_right(4))/2;   %scale factors
     %left
     v_leftEyeNose = (eyeCenter_left(2) - xyPoints_nose(2));
     v_leftCornerNose = (leftAnchorPoint(2) - xyPoints_nose(2));
@@ -559,19 +566,24 @@ while runLoop && ~endOfPage
     v_rightCornerNose = (rightAnchorPoint(2) - xyPoints_nose(2));
     v_rightEyerightEyelid = (rightEyelid(1,2) - eyeCenter_right(2));
     
-    h_l_feat(frameCount,1) = h_leftEyeNose;
-    h_l_feat(frameCount,2) = h_leftEyeleftCorner;
-    h_l_feat(frameCount,3) = h_leftCornerNose;
-    h_r_feat(frameCount,1) = h_rightEyeNose;
-    h_r_feat(frameCount,2) = h_rightEyerightCorner;
-    h_r_feat(frameCount,3) = h_rightCornerNose;
+    % horizontal distance between left eye center and left anchor point
+    h_l_feat(frameCount,1) = h_leftEyeNose/h_scale;
+    h_l_feat(frameCount,2) = h_leftEyeleftCorner/h_scale;
+    h_l_feat(frameCount,3) = h_leftCornerNose/h_scale;
+    h_l_feat(frameCount,4) = h_leftExtEyeNose_diff/h_scale;
+    h_r_feat(frameCount,1) = h_rightEyeNose/h_scale;
+    h_r_feat(frameCount,2) = h_rightEyerightCorner/h_scale;
+    h_r_feat(frameCount,3) = h_rightCornerNose/h_scale;
+    h_r_feat(frameCount,4) = h_rightExtEyeNose_diff/h_scale;
     
-    v_l_feat(frameCount,1) = v_leftEyeNose;
-    v_l_feat(frameCount,2) = v_leftCornerNose;
-    v_l_feat(frameCount,3) = v_leftEyeleftEyelid;
-    v_r_feat(frameCount,1) = v_rightEyeNose;
-    v_r_feat(frameCount,2) = v_rightCornerNose;
-    v_r_feat(frameCount,3) = v_rightEyerightEyelid;
+    % vertical features
+    % vertical distance between left eye center and left anchor point
+    v_l_feat(frameCount,1) = v_leftEyeNose/v_scale;
+    v_l_feat(frameCount,2) = v_leftCornerNose/v_scale;
+    v_l_feat(frameCount,3) = v_leftEyeleftEyelid/v_scale;
+    v_r_feat(frameCount,1) = v_rightEyeNose/v_scale;
+    v_r_feat(frameCount,2) = v_rightCornerNose/v_scale;
+    v_r_feat(frameCount,3) = v_rightEyerightEyelid/v_scale;
     
     % Estimates of the two outputs with the model found in calibration
     predH_l=[1, h_l_feat(frameCount,:)]*H_l;
@@ -608,13 +620,15 @@ while runLoop && ~endOfPage
     end
     
     % Display tracked points.
+    videoFrame = insertMarker(videoFrame, [bbox_eye_left(1),bbox_eye_left(2)+(bbox_eye_left(4)/2)], '*', 'Color', 'magenta');
+    videoFrame = insertMarker(videoFrame, [bbox_eye_right(1)+bbox_eye_right(3),bbox_eye_right(2)+(bbox_eye_right(4)/2)], '*', 'Color', 'magenta');
     videoFrame = insertMarker(videoFrame, eyeCenter_left, '*', 'Color', 'yellow');
     videoFrame = insertMarker(videoFrame, eyeCenter_right, '*', 'Color', 'yellow');
-    videoFrame = insertMarker(videoFrame, leftEyelid(1,:), '+', 'Color', 'white');
-    videoFrame = insertMarker(videoFrame, rightEyelid(1,:), '+', 'Color', 'white');
-    videoFrame = insertMarker(videoFrame, leftAnchorPoint, '+', 'Color', 'cyan');
-    videoFrame = insertMarker(videoFrame, rightAnchorPoint, '+', 'Color', 'cyan');
-    videoFrame = insertMarker(videoFrame, xyPoints_nose, '+', 'Color', 'white');
+    videoFrame = insertMarker(videoFrame, leftEyelid(1,:), '+', 'Color', 'blue');
+    videoFrame = insertMarker(videoFrame, rightEyelid(1,:), '+', 'Color', 'blue');
+    videoFrame = insertMarker(videoFrame, leftAnchorPoint, '+', 'Color', 'green');
+    videoFrame = insertMarker(videoFrame, rightAnchorPoint, '+', 'Color', 'green');
+    videoFrame = insertMarker(videoFrame, xyPoints_nose, '*', 'Color', 'black');
 
     % Display the annotated video frame using the video player object.
     step(videoPlayer, videoFrame);
