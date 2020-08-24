@@ -404,7 +404,7 @@ while runLoop && frameCount < frame_number
     %% FEATURE COLLECTION
         
     %horiz
-    h_scale = -(bbox_eye_left(1)-bbox_eye_right(1));   %scale factors
+    h_scale = -(bbox_eye_left(1)-bbox_eye_right(1)+bbox_eye_right(3));   %scale factors
     diff = -(bbox_eye_left(1)-xyPoints_nose(1))-(bbox_eye_right(1)-xyPoints_nose(1));
     %left
     h_leftEyeNose = -(eyeCenter_left(1) - xyPoints_nose(1));
