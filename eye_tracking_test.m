@@ -44,7 +44,9 @@ testFigure.Units = 'Normalized';
 testFigure.Position = [0 0 1 1];
 testFigure.Resize = 'off';
 
-figure_test = 4;
+% set [1 to 4] the shape to plot and look at
+% set 5 to random shape
+figure_test = 5;
 
 if(figure_test==1)
     rectangle('Position',[0,0,0.25,0.25],'FaceColor','b')
@@ -548,7 +550,7 @@ while runLoop && ~endOfPage
     h_leftEyeNose = -(eyeCenter_left(1) - xyPoints_nose(1));
     h_leftEyeleftCorner = -(eyeCenter_left(1) - leftAnchorPoint(1));
     h_leftCornerNose = -(leftAnchorPoint(1) - xyPoints_nose(1));
-    h_leftExtEyeNose_diff = diff
+    h_leftExtEyeNose_diff = diff;
     %right
     h_rightEyeNose = (eyeCenter_right(1) - xyPoints_nose(1));
     h_rightEyerightCorner = (eyeCenter_right(1) - rightAnchorPoint(1));
@@ -595,6 +597,7 @@ while runLoop && ~endOfPage
     predV = (predV_l+predV_r)/2;
     predsH = [predsH; predH];
     predsV = [predsV; predV];
+    
     %% figure
     figure(1)
     ax = gca;
@@ -602,20 +605,13 @@ while runLoop && ~endOfPage
     ax.XLim = [0 1];
     ax.YLim = [0 1];
     axis off
-
     
-    
-    % Insert text
     hold on
-    
-    % Plot the estimated screen point
-%     plot(predH_l,predV_l, 'r*','MarkerSize',7);
-%     plot(predH_r,predV_r, 'b*','MarkerSize',7);
+
     plot(predH,predV, 'k*','MarkerSize',7);
     hold off
-    % If the estimated gaze is inside the End of Page rectangle 5
-    % times the program stops
-    if predV>1 || predV<0 && predH>1 && predH<0 
+    % If the estimated gaze is out of the screen bip
+    if predV>1 || predV<0 || predH>1 || predH<0 
         sound(bip2)
     end
     
@@ -652,27 +648,6 @@ release(noseDetector);
 close all
 clearvars -except videoMontage predsH predsV
 
-% %% save video
-%  if isempty(dir('video/test*'))
-%      fileName = 'video/test1.avi';
-%  else
-%      files = dir('video/test*');
-%      fileName = files(end).name;
-%      ord = str2double(fileName(5));
-%      ord = ord+1;
-%      fileName = append('video/',fileName(1:4),num2str(ord),fileName(6:end));
-%  end
-%  outputVideo = VideoWriter(fileName);
-%  outputVideo.FrameRate = 10;
-%  open(outputVideo)
-%  for ii = 1:size(videoMontage,4)
-%     img = uint8(videoMontage(:,:,:,ii));
-%     writeVideo(outputVideo,img)
-%  end
-%  close(outputVideo)
-
-clearvars -except predsH predsV
-
 if isempty(dir('data/test*'))
     save('data/test1.mat')
 else
@@ -684,3 +659,23 @@ else
     save(filename,'predsH','predsV')
 end
 
+%% save video
+  if isempty(dir('video/test*'))
+      fileName = 'video/test1.avi';
+  else
+      files = dir('video/test*');
+      fileName = files(end).name;
+      ord = str2double(fileName(5));
+      ord = ord+1;
+      fileName = append('video/',fileName(1:4),num2str(ord),fileName(6:end));
+  end
+  outputVideo = VideoWriter(fileName);
+  outputVideo.FrameRate = 10;
+  open(outputVideo)
+  for ii = 1:size(videoMontage,4)
+     img = uint8(videoMontage(:,:,:,ii));
+     writeVideo(outputVideo,img)
+  end
+close(outputVideo)
+
+clearvars

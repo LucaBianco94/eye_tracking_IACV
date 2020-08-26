@@ -54,6 +54,7 @@ end
 predH=mean([predH_l predH_r],2);
 predV=mean([predV_l predV_r],2);
 
+% predicted values by model on training points
 subplot(211)
 plot(Yh,'k'), hold on, plot(predH_l,'r:'), plot(predH_r,'b:'), plot(predH,'m') 
 title('horizontal ax'), legend('real','predicted_l', 'predicted_r')

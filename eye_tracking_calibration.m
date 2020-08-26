@@ -426,18 +426,6 @@ while runLoop && frameCount < frame_number
     v_rightEyeNose = (eyeCenter_right(2) - xyPoints_nose(2));
     v_rightCornerNose = (rightAnchorPoint(2) - xyPoints_nose(2));
     v_rightEyerightEyelid = (rightEyelid(1,2) - eyeCenter_right(2));
-
-    
-    
-%     Pc = (leftAnchorPoint(:)+rightAnchorPoint(:)).'/2;
-%     Pi = (eyeCenter_left(:)+eyeCenter_right(:)).'/2;
-%     Vg = minus(Pc,Pi);
-%     leftECNVdistance = norm(eyeCenter_left(1,2)-xyPoints_nose(1,2));
-%     rightECNVdistance = norm(eyeCenter_right(1,2)-xyPoints_nose(1,2));
-%     H_n=mean([leftECNVdistance rightECNVdistance]);
-%     L_c=norm(leftAnchorPoint(1,1)-rightAnchorPoint(1,1));
-%     vx = Vg(1,1)/H_n;
-%     vy = Vg(1,2)/L_c;
     
     % horizontal distance between left eye center and left anchor point
     h_l_feat(frameCount,1) = h_leftEyeNose/h_scale;
@@ -513,26 +501,6 @@ close all
 calibrationTargets = calibrationTargets(1:end-1,:);
 clearvars -except horizontal_l horizontal_r vertical_l vertical_r videoMontage calibrationTargets
 
-%% save video
-% if isempty(dir('video/tracking*'))
-%     fileName = 'video/tracking1.avi';
-% else
-%     files = dir('video/tracking*');
-%     fileName = files(end).name;
-%     ord = str2double(fileName(9));
-%     ord = ord+1;
-%     fileName = append('video/',fileName(1:8),num2str(ord),fileName(10:end));
-% end
-% outputVideo = VideoWriter(fileName);
-% outputVideo.FrameRate = 10;
-% open(outputVideo)
-% for ii = 1:size(videoMontage,4)
-%    img = uint8(videoMontage(:,:,:,ii));
-%    %writeVideo(outputVideo,img)
-% end
-% close(outputVideo)
-clearvars -except horizontal_l horizontal_r vertical_l vertical_r calibrationTargets
-
 %% saving
 if isempty(dir('data/dataset*'))
     save('data/dataset1.mat')
@@ -544,3 +512,23 @@ else
     filename = append('data/',filename(1:7),num2str(ord),filename(9:end));
     save(filename,'calibrationTargets','horizontal_l','horizontal_r','vertical_l','vertical_r')
 end
+
+%% save video
+ if isempty(dir('video/calibration*'))
+     fileName = 'video/calibration1.avi';
+ else
+     files = dir('video/calibration*');
+     fileName = files(end).name;
+     ord = str2double(fileName(12));
+     ord = ord+1;
+     fileName = append('video/',fileName(1:11),num2str(ord),fileName(13:end));
+ end
+ outputVideo = VideoWriter(fileName);
+ outputVideo.FrameRate = 10;
+ open(outputVideo)
+ for ii = 1:size(videoMontage,4)
+    img = uint8(videoMontage(:,:,:,ii));
+    writeVideo(outputVideo,img)
+ end
+close(outputVideo)
+clearvars 
